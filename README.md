@@ -4,10 +4,10 @@ O repositorio consiste no codigo do site que fizemos para o PAC para espor nossa
 
 # Equipe
 
-Antonio Favarin Freire
-Felipe Beppler Huller
-Filipe Richters Barcellos
-Vinicius De Freitas
+- Antonio Favarin Freire
+- Felipe Beppler Huller
+- Filipe Richters Barcellos
+- Vinicius De Freitas
 
 # Constituição do projeot
 

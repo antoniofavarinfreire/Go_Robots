@@ -9,9 +9,9 @@ O repositorio consiste no codigo do site que fizemos para o PAC para espor nossa
 - Filipe Richters Barcellos
 - Vinicius De Freitas
 
-# Constituição do projeot
+# Constituição do projeto
 
-Nosso projeto será uma plicação simples de html css e um pouco de php. Usaremos essas linguagens para expor nossos trabalhos referente a robotica quanto nossos conhecimentos obtidos durante o semester.
+Nosso projeto será uma plicação simples de html, css, javascript e um pouco de php. Usaremos essas linguagens para expor nossos trabalhos referente a robotica quanto nossos conhecimentos obtidos durante o semestre.
 
 # Como baixar e hospedar o site
 

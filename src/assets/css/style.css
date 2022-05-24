@@ -19,3 +19,8 @@ body{
     text-align: center;
     height: 10vh;
  }
+
+.navbar { 
+    width: 100%;
+    background-color: red;
+}

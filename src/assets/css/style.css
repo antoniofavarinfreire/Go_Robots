@@ -66,3 +66,35 @@ body{
 .footer a:hover{
     color: grey;
 }
+/* Inicio tela arduino */
+.nabar_top{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.title_arduino{
+    width: 10%;
+    padding: 2vh;
+    border: 1px solid;
+    text-align: center;
+    margin-top: 1vh;
+    background: #000
+}
+.title_arduino a{
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+}
+.title_arduino a:hover{
+    color: #fff;
+}
+.pages_tittle {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    margin-top: 10vh;
+    font-size: 5vh;
+    font-weight: bold;
+}
+/* Fim tela arduino */

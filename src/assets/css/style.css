@@ -9,6 +9,7 @@ body{
     width: 100%;
     font-size: 1.2rem;
 }
+
 .footer {
     position: fixed;
     left: 0;
@@ -18,4 +19,50 @@ body{
     color: white;
     text-align: center;
     height: 10vh;
- }
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 12px;
+    align-items: center;
+}
+
+.footer .left{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 133.5px;
+}
+
+.footer .center{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 133.5px;
+}
+
+.footer .right{
+    font-size: 40px;
+    width: 133.5px;
+}
+
+.footer .right p{
+    font-size: 12px;
+}
+
+.footer p{
+    margin-bottom: 0px;
+}
+
+.footer b{
+    margin-bottom: 2px;
+}
+
+.footer a{
+    text-decoration: none;
+    color: white;
+}
+
+.footer a:hover{
+    color: grey;
+}

@@ -115,6 +115,36 @@ body{
     text-align: center;
     border: hidden;
 }
+.image_right {
+    width: 50%;
+    border-radius: 10px;
+}
+.arduino_description {
+    width: 50%;
+    padding: 1rem 0 0 1rem;
+}
+.container_image_text{
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100% ;
+}
+.arduino_explic{
+    width: 100%;
+}
+.left_side{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+}
+
+.container_arduino{
+    margin-bottom: 15vh;
+}
+.left_side{
+    margin-top: 5vh;
+}
 
 .video{
     display: flex;

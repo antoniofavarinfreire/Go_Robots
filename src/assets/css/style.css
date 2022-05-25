@@ -11,11 +11,11 @@ body{
 }
 
 .footer {
-    position: fixed;
+    /* position: fixed; */
     left: 0;
     bottom: 0;
     width: 100%;
-    background-color: #000000;
+    background-color: #484848;
     color: white;
     text-align: center;
     height: 10vh;
@@ -97,7 +97,32 @@ body{
     font-size: 5vh;
     font-weight: bold;
 }
-.arduino_description{
-    
-}
+
 /* Fim tela arduino */
+
+.home-link{
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.home-link .home-button{
+    display:inline-block;
+    color:white;
+    background: #484848;
+    padding: 10px;
+    text-align: center;
+    border: hidden;
+}
+
+.video{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.video iframe{
+    margin: 2rem;
+}
+

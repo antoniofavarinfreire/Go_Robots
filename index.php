@@ -12,22 +12,32 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">    
 
 </head>
+<body>
+        
+    <a class="home-link" href="link">
+        <button class="home-button">
+            <b>GO Robot's</b>
+        </button>
+    </a>
 
-<div class="container-fluid">
-    <div class="main-content">
-        <div class="left">
-            <h1>Nossos Projetos</h1>
-            <button>Arduinos</button>
+    <div class="container-fluid">
+        <div class="main-content">
+            <div class="left">
+                <h1>Nossos Projetos</h1>
+                <button class="ard-button">
+                    ARDUINOS
+                </button>
+            </div>
+            <div class="right">
+                <img src="src/assets/images/robots.png" width="1000">
+            </div>
         </div>
-        <div class="right">
-            <img src="src/assets/images/robots.png" alt="">
+        <div class="video">
+            <iframe width="868" height="372" src="https://www.youtube.com/embed/B8uYBrvTqyQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
 
-    <div class="video">
-        <iframe width="868" height="372" src="https://www.youtube.com/embed/B8uYBrvTqyQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-</div>
+</body>
 
 <footer>
 

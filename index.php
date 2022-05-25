@@ -14,6 +14,7 @@
 </head>
 
 <div class="container-fluid">
+    <div class="navbar">Go Robos</div>
     <div class="main-content">
         <div class="left">
             <h1>Nossos Projetos</h1>

@@ -139,6 +139,7 @@ body{
     width: 100%;
 }
 
+
 .container_arduino{
     margin-bottom: 15vh;
 }
@@ -155,4 +156,6 @@ body{
 .video iframe{
     margin: 2rem;
 }
-
+.text{
+    margin-left: 1vh;
+}

@@ -162,19 +162,22 @@ body{
     margin: 2rem;
 }
 
-.container-fluid .main-content{
+.main-content{
     display: flex;
-    justify-content: center;
-}
-
-.container-fluid .main-content .left{
-    display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
-
-.container-fluid .main-content .left .ard-button{
+.left{
+    margin-right: 5vh;
+}
+.button_quiz{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2vh;
+    width: 100%;
+}
+.ard-button{
     display:inline-block;
     color:white;
     background: #484848;
@@ -182,6 +185,13 @@ body{
     text-align: center;
     border: hidden;
     font-size: 16px;
+    font-weight: bolder;
+    width: 100%;
+    border: 1px solid #484848;
+}
+.ard-button:hover{
+    background-color: #fff;
+    color: #484848;
 }
 .text{
     margin-left: 1vh;

@@ -3,8 +3,8 @@
 #define PININ2 4
 #define PININ3 5
 #define PININ4 7
-#define PINENA 3
-#define PINENB 6
+#define PINEN5 3
+#define PINEN6 6
 
 // Portas sensor QTR
 #define SENSOR1 A0
@@ -27,70 +27,81 @@
 #define SPEED6 0 // Valor de 0 a 255 para velocidade com a seguinte leitura do sensor (0 0 0 0 1 1)
 #define SPEED7 120 // Valor de 0 a 255 para velocidade com a seguinte leitura do sensor (0 0 0 0 0 1)
 
-#define RUNTIME 18500 // Valor para executar o percurso
+#define RUNTIME 15000 // Valor para executar o percurso
 
-//constantes do PID
-double kp = 2
-double ki = 5
-double kd = 1
 
-unsigned long currentTime, previousTime;
-double elapsedTime;
-double error;
-double lastError;
-double input, output, setPoint;
-double cumError, rateError;
+double sensed_output, control_signal;
+double setpoint;
+double Kp = 0.038; 
+double Ki = 0;
+double Kd = 2.76; 
+int T; 
+unsigned long last_time;
+double totalError, lastError;
+int max_control;
+int min_control;
 
   
 //--- inicialização das entradas utilizadas ---//
 
 void setup() {
-
- pinMode(L, INPUT);
- pinMode(C, INPUT);
- pinMode(R, INPUT);
- pinMode(ENA, OUTPUT);
- pinMode(IN1, OUTPUT);
- pinMode(IN2, OUTPUT);
- pinMode(IN3, OUTPUT);
- pinMode(IN4, OUTPUT);
- pinMode(ENB, OUTPUT);
-
- digitalWrite(ENA, LOW);
- digitalWrite(IN1, LOW);
- digitalWrite(IN2, LOW);
- digitalWrite(IN3, LOW);
- digitalWrite(IN4, LOW);
- digitalWrite(ENB, LOW);
-
  //Serial.begin(9600);
  //Serial.println("Setup feito.");
-
+  PID();
 }
    
 
 
 void loop() {
 
-  followLineMEF();
+  //followLineMEF();
   PID();
-
+  //motorOption('6',255,255);
 }
-
+float error;
 void PID(){
-  currentTime = millis();                //get current time
-  elapsedTime = (double)(currentTime - previousTime);        //compute time elapsed from previous computation
   
-  error = Setpoint - inp;                                // determine error
-  cumError += error * elapsedTime;                // compute integral
-  rateError = (error - lastError)/elapsedTime;   // compute derivative
+  long currentTime = millis();
+  bool flag = true;
+  while(flag){
+    flag = motorStop(RUNTIME, currentTime);
 
-  double out = kp*error + ki*cumError + kd*rateError;  //PID output               
+    float position = followLineMEF();
+    
+    error = position - 3500;
 
-  lastError = error;                                //remember current error
-  previousTime = currentTime;          //remember current time
+    totalError += error;
 
-  return out;       
+    float motorSpeed = (Kp*error) + (Ki*totalError) + (Kd*(error-lastError));
+
+    lastError = error;
+
+    const float maxSpeedA = 255;
+    const float maxSpeedB = 255;
+    const float baseSpeedA = 180;
+    const float baseSpeedB = 180;
+
+    float speedA = (baseSpeedA + motorSpeed);
+    float speedB = (baseSpeedB - motorSpeed);
+
+    if(speedA > maxSpeedA){
+      speedA = maxSpeedA;
+    }
+
+    if(speedB > maxSpeedB){
+      speedB = maxSpeedB;
+    }
+
+    if(speedA < -baseSpeedA){
+      speedA = -baseSpeedA;
+    }
+    
+    if(speedB < -baseSpeedB){
+      speedB = -baseSpeedB;
+    }
+
+    motorControl(speedA, speedB);
+}
 }
 
 // Função para controle do driver de motor
@@ -101,8 +112,8 @@ void motorControl(int speedLeft, int speedRight) {
     pinMode(PININ2, OUTPUT);
     pinMode(PININ3, OUTPUT);
     pinMode(PININ4, OUTPUT);
-    pinMode(PINENA, OUTPUT);
-    pinMode(PINENB, OUTPUT);
+    pinMode(PINEN5, OUTPUT);
+    pinMode(PINEN6, OUTPUT);
 
     // Ajustes motor da esquerda
     if (speedLeft < 0) {
@@ -124,8 +135,8 @@ void motorControl(int speedLeft, int speedRight) {
         digitalWrite (PININ2, LOW);
     }
 
-    analogWrite (PINENA, speedLeft);
-    analogWrite (PINENB, speedRight);
+    analogWrite (PINEN5, speedLeft);
+    analogWrite (PINEN6, speedRight);
 }
 
 // Função para controle de motor com pre definições
@@ -149,14 +160,12 @@ void motorOption(char option, int speedLeft, int speedRight) {
     }
 }
 
-// Função de parada do robô
+// Função de paada do robô
 bool motorStop(long runtime, long currentTime) {
     if (millis() >= (runtime + currentTime)) {
         motorOption('0', 0, 0);
         int cont = 0;
         while (true) {
-            rgbControl(255, 0, 0, 500);
-            rgbControl(0, 0, 0, 500);
             cont++;
         }
         return false;
@@ -165,81 +174,129 @@ bool motorStop(long runtime, long currentTime) {
 }
 
 // Função para leitura dos sensores
-void readSensors(void) {
-    Serial.print(analogRead(A0));
+void readSensors(bool readSerial, int *sensors) {
+  // Função para leitura dos sensores
+  sensors[0] = analogRead(SENSOR1);
+  sensors[1] = analogRead(SENSOR2);
+  sensors[2] = analogRead(SENSOR3);
+  sensors[3] = analogRead(SENSOR4);
+  sensors[4] = analogRead(SENSOR5);
+  sensors[5] = analogRead(SENSOR6);
+  if (readSerial) {
+    Serial.print(sensors[0]);
     Serial.print(' ');
-    Serial.print(analogRead(A1));
+    Serial.print(sensors[1]);
     Serial.print(' ');
-    Serial.print(analogRead(A2));
+    Serial.print(sensors[2]);
     Serial.print(' ');
-    Serial.print(analogRead(A3));
+    Serial.print(sensors[3]);
     Serial.print(' ');
-    Serial.print(analogRead(A4));
+    Serial.print(sensors[4]);
     Serial.print(' ');
-    Serial.println(analogRead(A5));
-    Serial.print(' ');
+    Serial.println(sensors[5]);
+  }
 }
 
 // Função para controle do seguidor de linha em modo de maquina de estado finita
-void followLineMEF(void) {
-    bool flag = true;
-    long currentTime = millis();
+float followLineMEF(void) {
+  // Função para controle do seguidor de linha em modo de maquina de estado finita
+  bool flag = true;
+  long currentTime = millis();
 
-    while (flag) {
-        flag = motorStop(RUNTIME, currentTime);
+  while (flag) {
+    // Flag para verificar a parada
+    flag = motorStop(RUNTIME, currentTime);
 
-        // leitura do sensor (1 1 1 1 1 1)
-        if (analogRead(A0) <= TRESHOLD && analogRead(A1) <= TRESHOLD && analogRead(A2) <= TRESHOLD && analogRead(A3) <= TRESHOLD && analogRead(A4) <= TRESHOLD && analogRead(A5) <= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED0);
-            // leitura do sensor (0 1 1 1 1 0)
-        } else if ( analogRead(A0) >= TRESHOLD && analogRead(A1) <= TRESHOLD && analogRead(A2) <= TRESHOLD && analogRead(A3) <= TRESHOLD && analogRead(A4) <= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED0);
-            // leitura do sensor (0 0 1 1 0 0)
-        } else if ( analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) <= TRESHOLD && analogRead(A3) <= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED0);
-            // leitura do sensor (0 1 1 1 0 0)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) <= TRESHOLD && analogRead(A2) <= TRESHOLD && analogRead(A3) <= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED1);
-            // leitura do sensor (0 0 1 1 1 0)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) <= TRESHOLD && analogRead(A3) <= TRESHOLD && analogRead(A4) <= TRESHOLD && analogRead(A5) >= TRESHOLD ) {
-            motorOption('8', SPEED1, SPEED0);
-        // leitura do sensor (0 0 1 0 0 0)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) <= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED2);
-            // leitura do sensor (0 0 0 1 0 0)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) <= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD ) {
-            motorOption('8', SPEED2, SPEED0);
-            // leitura do sensor (0 1 1 0 0 0)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) <= TRESHOLD && analogRead(A2) <= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED3);
-            // leitura do sensor (0 0 0 1 1 0)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) <= TRESHOLD && analogRead(A4) <= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED3, SPEED0);
-            // leitura do sensor (1 1 1 0 0 0)
-        } else if (analogRead(A0) <= TRESHOLD && analogRead(A1) <= TRESHOLD && analogRead(A2) <= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED4);
-            // leitura do sensor (0 0 0 1 1 1)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) <= TRESHOLD && analogRead(A4) <= TRESHOLD && analogRead(A5) <= TRESHOLD) {
-            motorOption('8', SPEED4, SPEED0);
-            // leitura do sensor (0 1 0 0 0 0)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) <= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED5);
-            // leitura do sensor (0 0 0 0 1 0)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) <= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED5, SPEED0);
-            // leitura do sensor (1 1 0 0 0 0)
-        } else if (analogRead(A0) <= TRESHOLD && analogRead(A1) <= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('8', SPEED0, SPEED6);
-            // leitura do sensor (0 0 0 0 1 1)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) <= TRESHOLD && analogRead(A5) <= TRESHOLD) {
-            motorOption('8', SPEED6, SPEED0);
-            // leitura do sensor (1 0 0 0 0 0)
-        } else if (analogRead(A0) <= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) >= TRESHOLD) {
-            motorOption('6', SPEED7, SPEED7);
-            // leitura do sensor (0 0 0 0 0 1)
-        } else if (analogRead(A0) >= TRESHOLD && analogRead(A1) >= TRESHOLD && analogRead(A2) >= TRESHOLD && analogRead(A3) >= TRESHOLD && analogRead(A4) >= TRESHOLD && analogRead(A5) <= TRESHOLD) {
-            motorOption('4', SPEED7, SPEED7);
-        }
+    // Leitura sensores
+    int s[6];
+    readSensors(false, s);
+
+    // leitura do sensor (1 1 1 1 1 1) = 0
+    
+    if (s[0] <= TRESHOLD && s[1] <= TRESHOLD && s[2] <= TRESHOLD && s[3] <= TRESHOLD && s[4] <= TRESHOLD && s[5] <= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED0);
+      error = 0;
+
+      // leitura do sensor (0 1 1 1 1 0) = 0
+    } else if ( s[0] >= TRESHOLD && s[1] <= TRESHOLD && s[2] <= TRESHOLD && s[3] <= TRESHOLD && s[4] <= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED0);
+      error = 0;
+
+      // leitura do sensor (0 0 1 1 0 0) = 0
+    } else if ( s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] <= TRESHOLD && s[3] <= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED0);
+      error = 0;
+      // leitura do sensor (0 0 1 0 0 0) = 0.5
+    } else if (s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] <= TRESHOLD && s[3] >= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED2);
+      error = 0.5;
+      
+      // leitura do sensor (0 0 0 1 0 0) = -0.5
+    } else if (s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] >= TRESHOLD && s[3] <= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD ) {
+      motorOption('8', SPEED2, SPEED0);
+      error = -0.5;
+
+      // leitura do sensor (0 1 1 1 0 0) = 1
+    } else if (s[0] >= TRESHOLD && s[1] <= TRESHOLD && s[2] <= TRESHOLD && s[3] <= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED1);
+      error = 1;
+      
+      // leitura do sensor (0 0 1 1 1 0) = -1
+    } else if (s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] <= TRESHOLD && s[3] <= TRESHOLD && s[4] <= TRESHOLD && s[5] >= TRESHOLD ) {
+      motorOption('8', SPEED1, SPEED0);
+      error = -1;
+
+
+      // leitura do sensor (0 1 1 0 0 0) = 1.5
+    } else if (s[0] >= TRESHOLD && s[1] <= TRESHOLD && s[2] <= TRESHOLD && s[3] >= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED3);
+      error = 1.5;
+      
+      // leitura do sensor (0 0 0 1 1 0) = -1.5
+    } else if (s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] >= TRESHOLD && s[3] <= TRESHOLD && s[4] <= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED3, SPEED0);
+      error = -1.5;
+
+      // leitura do sensor (0 1 0 0 0 0) = 2
+    } else if (s[0] >= TRESHOLD && s[1] <= TRESHOLD && s[2] >= TRESHOLD && s[3] >= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED5);
+      error = 2;
+      
+      // leitura do sensor (0 0 0 0 1 0) = -2
+    } else if (s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] >= TRESHOLD && s[3] >= TRESHOLD && s[4] <= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED5, SPEED0);
+      error = -2;
+      
+      // leitura do sensor (1 1 1 0 0 0) = 2.5
+    } else if (s[0] <= TRESHOLD && s[1] <= TRESHOLD && s[2] <= TRESHOLD && s[3] >= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED4);
+      error = 2.5;
+      
+      // leitura do sensor (0 0 0 1 1 1) = -2.8
+    } else if (s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] >= TRESHOLD && s[3] <= TRESHOLD && s[4] <= TRESHOLD && s[5] <= TRESHOLD) {
+      motorOption('8', SPEED4, SPEED0);
+      error = -2.5;
+
+      // leitura do sensor (1 1 0 0 0 0) = 3
+    } else if (s[0] <= TRESHOLD && s[1] <= TRESHOLD && s[2] >= TRESHOLD && s[3] >= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('8', SPEED0, SPEED6);
+      error = 3;
+      
+      // leitura do sensor (0 0 0 0 1 1) = -3.7
+    } else if (s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] >= TRESHOLD && s[3] >= TRESHOLD && s[4] <= TRESHOLD && s[5] <= TRESHOLD) {
+      motorOption('8', SPEED6, SPEED0);
+      error = -3.4;
+
+      // leitura do sensor (1 0 0 0 0 0) = 3.5
+    } else if (s[0] <= TRESHOLD && s[1] >= TRESHOLD && s[2] >= TRESHOLD && s[3] >= TRESHOLD && s[4] >= TRESHOLD && s[5] >= TRESHOLD) {
+      motorOption('6', SPEED7, SPEED7);
+      error = 3.5;
+      
+      // leitura do sensor (0 0 0 0 0 1) = -4.2
+    } else if (s[0] >= TRESHOLD && s[1] >= TRESHOLD && s[2] >= TRESHOLD && s[3] >= TRESHOLD && s[4] >= TRESHOLD && s[5] <= TRESHOLD) {
+      motorOption('4', SPEED7, SPEED7);
+      error = -3.9;
     }
-    motorOption('0', 0, 0);
-}
+  }
+  return error;
+}r

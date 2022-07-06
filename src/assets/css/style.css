@@ -147,7 +147,9 @@ body{
 .container_arduino{
     margin-bottom: 15vh;
 }
-
+.seguidor_linha{
+    margin-top: 3vh;
+}
 .left_side{
     margin-top: 5vh;
 }
